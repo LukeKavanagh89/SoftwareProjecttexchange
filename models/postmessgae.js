@@ -1,15 +1,17 @@
 import mongoose from "mongoose";
 
 const postSchema = mongoose.Schema({
-    title: String,
+    Name: String,
     message: String,
-    concert: String, 
-    tags: [String],
+    Event: String, 
+    Price: String,
+    AccountUser: String,
     selectedFile: String,
-    interestedCount: {
-        type: Number,
-        default: 0
+     likeCount: {
+        type: [String],
+        default: 0,
     },
+    
     createdAt: {
         type: Date,
         default: new Date()

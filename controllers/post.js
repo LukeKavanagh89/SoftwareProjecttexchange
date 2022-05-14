@@ -1,9 +1,9 @@
 
-import { response, } from "express";
+import { response } from "express";
 import mongoose from "mongoose";
-import PostMessage from "../models/postmessgae.js";
+import PostMessage from "../models/postMessgae.js";
 
-export const getPosts = (request, response) => {
+export const getPosts = (request, response  ) => {
    try{
        const PostMessage = await PostMessage.find();
 
@@ -18,8 +18,7 @@ export const getPosts = (request, response) => {
 
 export const createPost = (request, response) => {
     const post = request.body;
-
-    const newPost = newPostMessage(post);
+    const newPost = newPostMessage({ ... post, Name: request.userId, createdAt: new Date().toISOString()});
   try {
       newPost.save();
 
@@ -51,9 +50,22 @@ export const deletePost = (request, response) => {
 }
 export const likePost = async (request, response) => {
     const { id } = request.params;
+
+    if(!request.userId) return response.json({ message: 'Not validated'})
+
+
     if(mongoose.Types.ObjectId.isValid(id)) return response.status(404).send('Event doesnt have a id');
     const post = await PostMessage.findById(id);
-    const updatedPost = await PostMessage.findByIdAndUpdate(id, {likeCount: post.likeCount + 1 }, { new: true })
+    //Shows who is interested in Post/Event
+    const index = post.likeCount.findIndex((id) => id === String(request.userId));
+    if(index === -1){
+        post.likeCount.push(request.userId);
+    } else{
+        //Removing interest from event
+        post.likeCount = post.likeCount.filter((id) => id !== String(request.userId));
+
+    }
+    const updatedPost = await PostMessage.findByIdAndUpdate(id, post, { new: true })
 
     request.json(updatedPost);
     
